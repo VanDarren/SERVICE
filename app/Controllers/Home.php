@@ -20,6 +20,14 @@ public function log_activity()
     $data['logs'] = $model->getLogs();
     $where = array('id_setting' => '1');
     $data['darren2'] = $model->getwhere('setting', $where);
+    $id_user = session()->get('id');
+    $model = new servicemodel;
+    $activityLog = [
+        'id_user' => $id_user,
+        'activity' => 'Masuk ke Log Activity',
+        'time' => date('Y-m-d H:i:s')
+    ];
+    $model->logActivity($activityLog);
     echo view('header',$data);
     echo view('menu', $data);
     echo view('log_activity', $data);
@@ -77,7 +85,14 @@ public function log_activity()
             $data['darren'] = $model->getRecentOrders();
             $where = ['id_setting' => '1'];
             $data['darren2'] = $model->getwhere('setting', $where);
-    
+            $id_user = session()->get('id');
+            $model = new servicemodel;
+            $activityLog = [
+                'id_user' => $id_user,
+                'activity' => 'Masuk ke Dashboard',
+                'time' => date('Y-m-d H:i:s')
+            ];
+            $model->logActivity($activityLog);
             echo view('header', $data);
             echo view('menu', $data);
             echo view('dashboard', $data); // Pass data to view
@@ -106,17 +121,26 @@ public function getTechnicianName()
 
 public function hapusp($id)
 {
-    $model = new servicemodel;
-    $where = array('id_pesanan' => $id);
+    $model = new servicemodel();
     $id_user = session()->get('id');
-    $model = new servicemodel;
+    $data = [
+        'deleted_at' => date('Y-m-d H:i:s'),
+        'deleted_by' => $id_user
+    ];
+
+    // Lakukan soft delete dengan mengupdate kolom 'delete'
+    $model->edit('pesanan', $data, ['id_pesanan' => $id]);
+
+    // Log aktivitas pengguna
+    $id_user = session()->get('id');
     $activityLog = [
         'id_user' => $id_user,
         'activity' => 'Hapus Pesanan',
         'time' => date('Y-m-d H:i:s')
     ];
     $model->logActivity($activityLog);
-    $model->hapus('pesanan', $where);
+
+    // Redirect ke halaman transaksi
     return redirect()->to('home/dashboard');
 }
 
@@ -370,8 +394,9 @@ public function pesan()
         $e = $this->request->getPost('mesin');
         $f = $this->request->getPost('kapasitas');
         $g = $this->request->getPost('deskripsi');
-        $h = $this->request->getPost('tanggal_service'); // Get the optional service date
-    
+        $h = $this->request->getPost('tanggal_service'); 
+        $id_user = session()->get('id');
+
         $tabel = array(
             'nama_pemilik' => $a,
             'no_telp' => $b,
@@ -380,9 +405,11 @@ public function pesan()
             'merk_mesin' => $e,
             'kapasitas_genset' => $f,
             'deskripsi_masalah' => $g,
-            'tanggal_permintaan' => $h, // Save the service date if provided
+            'tanggal_permintaan' => $h, 
             'status' => 'Pending',
             'sistem_pesanan' => '-',
+            'created_at' => date('Y-m-d H:i:s'), 
+            'created_by' => $id_user
         );
         $id_user = session()->get('id');
         $model = new servicemodel;
@@ -401,10 +428,19 @@ public function pesan()
 	{
 		if (session()->get('level') == 'Pelanggan' || session()->get('level') == 'Admin') {
 			$model = new servicemodel;
-			$data['darren'] = $model->tampil('teknisi');
+			$data['darren'] = $model->tampil_urut('teknisi');
 			
 			$where = array('id_setting' => '1');
 			$data['darren2'] = $model->getwhere('setting', $where);
+
+            $id_user = session()->get('id');
+            $model = new servicemodel;
+            $activityLog = [
+                'id_user' => $id_user,
+                'activity' => 'Masuk Menu Teknisi',
+                'time' => date('Y-m-d H:i:s')
+            ];
+            $model->logActivity($activityLog);
 			echo view('header',$data);
 			echo view('menu',$data);
 			echo view('teknisi', $data);
@@ -415,19 +451,30 @@ public function pesan()
 	}
 	public function deletet($id)
 	{
-		$model = new servicemodel;
-		$where = array('id_teknisi' => $id);
-		$model->hapus('teknisi', $where);
+        $model = new servicemodel();
         $id_user = session()->get('id');
-        $model = new servicemodel;
+
+        $data = [
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'deleted_by' => $id_user
+        ];
+    
+        // Lakukan soft delete dengan mengupdate kolom 'delete'
+        $model->edit('teknisi', $data, ['id_teknisi' => $id]);
+    
+        // Log aktivitas pengguna
+        $id_user = session()->get('id');
         $activityLog = [
             'id_user' => $id_user,
-            'activity' => 'Delete Teknisi',
+            'activity' => 'Hapus Teknisi',
             'time' => date('Y-m-d H:i:s')
         ];
         $model->logActivity($activityLog);
-		return redirect()->to('home/teknisi');
+    
+        // Redirect ke halaman transaksi
+        return redirect()->to('home/teknisi');
 	}
+
 	public function eteknisi($id)
 	{
 		$model = new servicemodel();
@@ -440,32 +487,53 @@ public function pesan()
 		echo view('eteknisi', $data);
 		echo view('footer');
 	}
-	public function aksieteknisi()
-	{
-		$model = new servicemodel;
-		$a = $this->request->getPost('nama');
-		$b = $this->request->getPost('notelp');
-		$c = $this->request->getPost('email');
-		$d = $this->request->getPost('status');
-		$id = $this->request->getPost('id');
-		$where = array('id_teknisi' => $id);
-		$isi = array(
-			'nama_teknisi' => $a,
-			'no_telp' => $b,
-			'email' => $c,
-			'status' => $d
-		);
+
+    public function aksieteknisi()
+    {
+        $model = new servicemodel();
+        
+        $a = $this->request->getPost('nama');
+        $b = $this->request->getPost('notelp');
+        $c = $this->request->getPost('email');
+        $d = $this->request->getPost('status');
+        $id = $this->request->getPost('id');
         $id_user = session()->get('id');
-        $model = new servicemodel;
-        $activityLog = [
-            'id_user' => $id_user,
-            'activity' => 'Edit Teknisi',
-            'time' => date('Y-m-d H:i:s')
-        ];
-        $model->logActivity($activityLog);
-		$model->edit('teknisi', $isi, $where);
-		return redirect()->to('home/teknisi');
-	}
+    
+        // Cek apakah ada data dengan id_produk yang sama di produk_backup
+        $backupWhere = ['id_teknisi' => $id];
+        $existingBackup = $model->getWhere('teknisi_backup', $backupWhere);
+    
+        if ($existingBackup) {
+            // Hapus data lama di produk_backup jika ada
+            $model->hapus('teknisi_backup', $backupWhere);
+        }
+    
+        // Ambil data produk lama berdasarkan id_produk
+        $produkLama = $model->getProductById($id);
+        
+        // Simpan data produk lama ke tabel produk_backup
+        $backupData = (array) $produkLama;  // Ubah objek menjadi array
+        $model->tambah('teknisi_backup', $backupData);
+    
+        // Menyiapkan data yang akan di-update
+        $isi = array(
+            'nama_teknisi' => $a,
+            'no_telp' => $b,
+            'email' => $c,
+            'status' => $d,
+            'updated_at' => date('Y-m-d H:i:s'), 
+            'updated_by' => $id_user
+        );
+
+    
+        // Update data produk di database
+        $where = array('id_teknisi' => $id);
+        $model->edit('teknisi', $isi, $where);
+    
+        return redirect()->to('home/teknisi');
+    }
+    
+    
 	public function tteknisi()
 	{
 		$model = new servicemodel();
@@ -483,11 +551,14 @@ public function pesan()
 		$nama = $this->request->getPost('nama');
 		$jenis = $this->request->getPost('notelp');
 		$harga = $this->request->getPost('email');
+        $id_user = session()->get('id');
 		$tabel = array(
 			'nama_teknisi' => $nama,
 			'no_telp' => $jenis,
 			'email' => $harga,
-			'status' => 'Tidak Aktif'
+			'status' => 'Tidak Aktif',
+            'created_at' => date('Y-m-d H:i:s'), 
+            'created_by' => $id_user
 		);
         $id_user = session()->get('id');
         $model = new servicemodel;
@@ -503,54 +574,70 @@ public function pesan()
 	}
 
     public function transaksi()
-    {
-        if (session()->get('level') > '') {
-            $model = new servicemodel();
-    
-            // Determine the current page and items per page
-            $page = $this->request->getVar('page') ? (int)$this->request->getVar('page') : 1;
-            $perPage = 8;
-    
-            // Calculate the offset for the query
-            $offset = ($page - 1) * $perPage;
-    
-            // Get the total number of rows
-            $totalRows = $model->db->table('transaksi')->countAllResults();
-    
-            // Fetch the data with pagination
-            $data['darren'] = $model->tampil2('transaksi', $perPage, $offset);
-    
-            // Calculate total pages
-            $data['totalPages'] = ceil($totalRows / $perPage);
-            $data['currentPage'] = $page;
-    
-            // Fetch other necessary data
-            $where = array('id_setting' => '1');
-            $data['darren2'] = $model->getwhere('setting', $where);
-    
-            // Load the views
-            echo view('header', $data);
-            echo view('menu', $data);
-            echo view('transaksi', $data);
-            echo view('footer');
-        } else {
-            return redirect()->to('home/login');
+{
+    if (session()->get('level') > '') {
+        $model = new servicemodel();
+
+        // Determine the current page and items per page
+        $page = $this->request->getVar('page') ? (int)$this->request->getVar('page') : 1;
+        $perPage = 8;
+
+        // Calculate the offset for the query
+        $offset = ($page - 1) * $perPage;
+
+        // Get the total number of rows (for pagination)
+        $totalRows = $model->db->table('transaksi')->countAllResults();
+
+        // Fetch the data with pagination
+        $data['darren'] = $model->tampil2('transaksi', $perPage, $offset);
+
+        // Calculate total pages
+        $data['totalPages'] = ceil($totalRows / $perPage);
+        $data['currentPage'] = $page;
+
+        // Calculate the total amount for the current page
+        $totalAmount = 0;
+        foreach ($data['darren'] as $transaction) {
+            $totalAmount += $transaction['harga'];
         }
+        $data['totalAmount'] = $totalAmount;
+
+        // Fetch other necessary data
+        $where = array('id_setting' => '1');
+        $data['darren2'] = $model->getwhere('setting', $where);
+
+        // Log user activity
+        $id_user = session()->get('id');
+        $activityLog = [
+            'id_user' => $id_user,
+            'activity' => 'Masuk Menu Transaksi',
+            'time' => date('Y-m-d H:i:s')
+        ];
+        $model->logActivity($activityLog);
+
+        echo view('header', $data);
+        echo view('menu', $data);
+        echo view('transaksi', $data);
+        echo view('footer');
+    } else {
+        return redirect()->to('home/login');
     }
-    
+}
+
+
 
 
     public function hapust($id)
     {
         $model = new servicemodel();
-    
-        // Update kolom 'delete' dengan timestamp untuk soft delete
+        $id_user = session()->get('id');
         $data = [
-            'delete' => date('Y-m-d H:i:s')
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'deleted_by' => $id_user
         ];
     
         // Lakukan soft delete dengan mengupdate kolom 'delete'
-        $model->updatee($id, $data);
+        $model->edit('transaksi', $data, ['id_transaksi' => $id]);
     
         // Log aktivitas pengguna
         $id_user = session()->get('id');
@@ -566,22 +653,22 @@ public function pesan()
     }
     
 
-	public function user()
-	{
-		if(session()->get('level') == 'Admin'){
-			$model=new servicemodel;
-		$data['darren'] = $model->tampil('user');
+	// public function user()
+	// {
+	// 	if(session()->get('level') == 'Admin'){
+	// 		$model=new servicemodel;
+	// 	$data['darren'] = $model->tampil('user');
 
-		$where = array('id_setting' => '1');
-		$data['darren2'] = $model->getwhere('setting', $where);
-		echo view('header', $data);
-		echo view('menu', $data);
-		echo view('user',$data);
-		echo view('footer');
-	}else{
-		return redirect()->to('home/error404');   
-	}
-	}
+	// 	$where = array('id_setting' => '1');
+	// 	$data['darren2'] = $model->getwhere('setting', $where);
+	// 	echo view('header', $data);
+	// 	echo view('menu', $data);
+	// 	echo view('user',$data);
+	// 	echo view('footer');
+	// }else{
+	// 	return redirect()->to('home/error404');   
+	// }
+	// }
 
 	public function setting()
 	{
@@ -589,6 +676,14 @@ public function pesan()
 			$model = new servicemodel();
 			$where = array('id_setting' => 1);
 			$data['darren2'] = $model->getwhere('setting', $where);
+            $id_user = session()->get('id');
+            $model = new servicemodel;
+            $activityLog = [
+                'id_user' => $id_user,
+                'activity' => 'Masuk Menu Setting',
+                'time' => date('Y-m-d H:i:s')
+            ];
+            $model->logActivity($activityLog);
 			echo view('header', $data);
 			echo view('menu', $data);
 			echo view('setting', $data);
@@ -644,24 +739,45 @@ public function pesan()
 }
 
 
-	public function laporan()
-	{
-		if(session()->get('level') == 'Admin'){
-			$model=new servicemodel;
-		$data['darren'] = $model->tampil('transaksi');
+public function laporan()
+{
+    if (session()->get('level') == 'Admin') {
+        $model = new servicemodel();
+        $tanggal1 = $this->request->getPost('tanggal1');
+        $tanggal2 = $this->request->getPost('tanggal2');
 
-		$where = array('id_setting' => 1);
-			$data['darren2'] = $model->getwhere('setting', $where);
-		echo view('header', $data);
-		echo view('menu', $data);
-		echo view('laporan',$data);
-		echo view('footer');
-	}else{
-		return redirect()->to('home/error404');
-	}
-	}
+        if ($tanggal1 && $tanggal2) {
+            $data['filteredTransactions'] = $model->getFilteredTransactions($tanggal1, $tanggal2);
 
-	
+            if (empty($data['filteredTransactions'])) {
+                $data['noDataMessage'] = 'No transactions found for the selected date range.';
+            }
+        } else {
+            $data['filteredTransactions'] = []; // Empty array if no filter is applied
+        }
+
+        $where = ['id_setting' => 1];
+        $data['darren2'] = $model->getwhere('setting', $where);
+
+        $id_user = session()->get('id');
+        $activityLog = [
+            'id_user' => $id_user,
+            'activity' => 'Masuk Menu Laporan',
+            'time' => date('Y-m-d H:i:s')
+        ];
+        $model->logActivity($activityLog);
+
+        echo view('header', $data);
+        echo view('menu', $data);
+        echo view('laporan', $data);
+        echo view('footer');
+    } else {
+        return redirect()->to('home/error404');
+    }
+}
+
+
+
 
 	public function error404()
 	{
@@ -684,6 +800,7 @@ public function pesan()
     $status = $this->request->getPost('status');
     $teknisi = $this->request->getPost('teknisi');
     $estimasiWaktu = $this->request->getPost('estimasi_waktu') ?: '00:00:00';
+    $id_user = session()->get('id');
 
     $where = array('id_pesanan' => $id);
 
@@ -691,7 +808,9 @@ public function pesan()
         'sistem_pesanan' => $sistemPesanan,
         'status' => $status,
         'id_teknisi' => $teknisi,
-        'estimasi_waktu' => $estimasiWaktu
+        'estimasi_waktu' => $estimasiWaktu,
+        'updated_at' => date('Y-m-d H:i:s'), // Set created_at to current date and time
+        'updated_by' => $id_user
     );
     $id_user = session()->get('id');
     $model = new servicemodel;
@@ -707,7 +826,7 @@ public function pesan()
         // Get the id_user and nama from pesanan
         $orderData = $model->getOrderById($id);
         $no_transaksi = $model->generateNoTransaksi();
-      
+        $id_user = session()->get('id');
         $transaksiData = [
             'nama_pemilik' => $orderData['nama_pemilik'],
             'no_transaksi' => $no_transaksi,
@@ -715,7 +834,9 @@ public function pesan()
             'harga' => 0,
             'status' => 'Belum Bayar',
             'jenis_service' => '(Belum ditentukan)',
-            'id_teknisi' => $orderData['id_teknisi']
+            'id_teknisi' => $orderData['id_teknisi'],
+            'created_at' => date('Y-m-d H:i:s'), // Set created_at to current date and time
+         'created_by' => $id_user
         ];
 
         $model->insertTransaksi($transaksiData);
@@ -735,16 +856,12 @@ public function pesan()
 }
 
 
-
-
-
-
 public function editTransaksi()
 {
     $id = $this->request->getPost('id_transaksi');
     $jenisService = $this->request->getPost('jenis_service');
     $harga = $this->request->getPost('harga');
-  
+    $id_user = session()->get('id');
 
     $model = new servicemodel;
 	if ($harga <= 0) {
@@ -755,6 +872,8 @@ public function editTransaksi()
     $data = [
         'jenis_service' => $jenisService,
         'harga' => $harga,
+        'updated_at' => date('Y-m-d H:i:s'), // Set created_at to current date and time
+        'updated_by' => $id_user
     ];
 
     $where = ['id_transaksi' => $id];
@@ -962,23 +1081,207 @@ public function printwindows()
 public function restoret()
 {
     $model = new servicemodel();
+	$where = array('id_setting' => '1');
+			$data['darren2'] = $model->getwhere('setting', $where);
+    $data['deletedTransaksi'] = $model->query('SELECT * FROM transaksi WHERE deleted_at IS NOT NULL');
 
-    $data['deletedTransaksi'] = $model->query('SELECT * FROM transaksi WHERE deleted IS NOT NULL');
-
-    echo view('header');
-    echo view('menu');
+    echo view('header',$data);
+    echo view('menu',$data);
     echo view('restoret', $data);
     echo view('footer');
 }
 
-public function restore($id)
+public function restorep()
 {
     $model = new servicemodel();
+	$where = array('id_setting' => '1');
+			$data['darren2'] = $model->getwhere('setting', $where);
+    $data['deletedPesanan'] = $model->query('SELECT * FROM pesanan WHERE deleted_at IS NOT NULL');
 
-    // Restore transaksi dengan mengubah field 'delete' menjadi NULL
-    $model->editkan($id, ['deleted' => NULL]);
+    echo view('header',$data);
+    echo view('menu',$data);
+    echo view('restorep', $data);
+    echo view('footer');
+}
 
-    // Redirect ke halaman restore
+public function retteknisi()
+{
+    $model = new servicemodel();
+	$where = array('id_setting' => '1');
+			$data['darren2'] = $model->getwhere('setting', $where);
+    $data['deletedTeknisi'] = $model->query('SELECT * FROM teknisi WHERE deleted_at IS NOT NULL');
+
+    echo view('header',$data);
+    echo view('menu',$data);
+    echo view('retteknisi', $data);
+    echo view('footer');
+}
+
+public function restore($id) {
+    $model = new servicemodel();
+    
+    $data = [
+        'deleted_at' => null,
+        'deleted_by' => null,
+      
+    ];
+    $id_user = session()->get('id');
+    $model = new servicemodel;
+    $activityLog = [
+        'id_user' => $id_user,
+        'activity' => 'Restore Transaksi',
+        'time' => date('Y-m-d H:i:s')
+    ];
+    $model->logActivity($activityLog);
+   
+    $model->edit('transaksi', $data, ['id_transaksi' => $id]);
+
     return redirect()->to('home/restoret');
 }
+
+public function restore2($id) {
+    $model = new servicemodel();
+    
+    $data = [
+        'deleted_at' => null,
+        'deleted_by' => null,
+    ];
+    $id_user = session()->get('id');
+    $model = new servicemodel;
+    $activityLog = [
+        'id_user' => $id_user,
+        'activity' => 'Restore Pesanan',
+        'time' => date('Y-m-d H:i:s')
+    ];
+    $model->logActivity($activityLog);
+   
+    $model->edit('pesanan', $data, ['id_pesanan' => $id]);
+
+    return redirect()->to('home/restorep');
+}
+
+public function restore3($id) {
+    $model = new servicemodel();
+    
+    $data = [
+        'deleted_at' => null,
+        'deleted_by' => null,
+    ];
+    $id_user = session()->get('id');
+    $model = new servicemodel;
+    $activityLog = [
+        'id_user' => $id_user,
+        'activity' => 'Restore Teknisi Terhapus',
+        'time' => date('Y-m-d H:i:s')
+    ];
+    $model->logActivity($activityLog);
+   
+    $model->edit('teknisi', $data, ['id_teknisi' => $id]);
+
+    return redirect()->to('home/retteknisi');
+}
+
+public function restoreteknisi($id)
+{
+    $model = new servicemodel();
+    
+    // Ambil data dari tabel produk_backup berdasarkan id_produk
+    $backupData = $model->getWhere('teknisi_backup', ['id_teknisi' => $id]);
+
+    if ($backupData) {
+        // Konversi data backup menjadi array
+        $restoreData = (array) $backupData;
+
+        // Hapus id_produk dari array karena id_produk tidak perlu di-update
+        unset($restoreData['id_teknisi']);
+
+        // Update data di tabel produk dengan data dari produk_backup
+        $model->edit('teknisi', $restoreData, ['id_teknisi' => $id]);
+
+        // Hapus data dari tabel produk_backup setelah di-restore
+        $model->hapus('teknisi_backup', ['id_teknisi' => $id]);
+    }
+
+    return redirect()->to('home/teknisi');
+}
+
+public function reditteknisi()
+{
+    $model = new ServiceModel();
+
+    $where = array('id_setting' => '1');
+    $data['darren2'] = $model->getwhere('setting', $where);
+    $data['backupData'] = $model->getBackupData();
+
+    // Load the views and pass the data
+    echo view('header',$data);
+    echo view('menu',$data);
+    echo view('reditteknisi', $data);
+    echo view('footer');
+}
+
+public function profile()
+{
+    if (session()->get('level') > '') {
+        $model = new servicemodel;
+        
+        $where = array('id_setting' => '1');
+        $data['darren2'] = $model->getwhere('setting', $where);
+
+        $where = array('id_user' => session()->get('id'));
+        $data['user'] = $model->getWhere('user', $where); // Assuming it returns a single result object
+
+        echo view('header', $data);
+        echo view('menu', $data);
+        echo view('profile', $data);
+        echo view('footer');
+    } else {
+        return redirect()->to('home/login');
+    }
+}
+
+
+public function updateProfile()
+{
+    if($this->request->getMethod() === 'post'){
+        $model = new servicemodel();
+        $id_user = session()->get('id');
+        $data = [
+            'username' => $this->request->getPost('username'),
+            'email' => $this->request->getPost('email')
+        ];
+        
+        // Update the user in the database
+        $model->updateUser($id_user, $data);
+        
+        // Update the session data with the new username
+        session()->set('username', $data['username']);
+      
+        return redirect()->to('home/profile')->with('success', 'Profile updated successfully.');
+    }
+}
+
+ 
+public function resetPassword($id) {
+    $model = new servicemodel();
+    
+    $data = [
+        'password' => 123,
+      
+    ];
+    $id_user = session()->get('id');
+    $model = new servicemodel;
+    $activityLog = [
+        'id_user' => $id_user,
+        'activity' => 'Reset Password',
+        'time' => date('Y-m-d H:i:s')
+    ];
+    $model->logActivity($activityLog);
+   
+    $model->edit('user', $data, ['id_user' => $id]);
+
+    return redirect()->to('home/profile');
+}
+
+
 }

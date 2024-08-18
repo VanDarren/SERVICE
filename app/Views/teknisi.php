@@ -4,10 +4,15 @@
         <div class="bg-light text-center rounded p-4">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h6 class="mb-0">Teknisi</h6>
-                <?php if(session()->get('level')=="Admin" ){ ?>
-                    <a class="btn btn-sm btn-primary" href="<?= base_url('home/tteknisi') ?>">Tambah Teknisi</a>
-                    <?php } ?>
+                <?php if(session()->get('level') == "Admin" ){ ?>
+                    <div>
+                        <a class="btn btn-sm btn-primary" href="<?= base_url('home/tteknisi') ?>">Tambah Teknisi</a>
+                        <a class="btn btn-sm btn-success" href="<?= base_url('home/reditteknisi') ?>">Restore Edit Teknisi</a>
+                        <a class="btn btn-sm btn-warning" href="<?= base_url('home/retteknisi') ?>">Restore Data Teknisi</a>
+                    </div>
+                <?php } ?>
             </div>
+
             <div class="table-responsive">
                 <table class="table text-start align-middle table-bordered table-hover mb-0">
                     <thead>
@@ -16,21 +21,19 @@
                             <th scope="col">No. Telp</th>
                             <th scope="col">Email</th>
                             <th scope="col">Status</th>
-                            <?php if(session()->get('level')=="Admin" ){ ?>
+                            <?php if(session()->get('level') == "Admin" ){ ?>
                                 <th scope="col">Action</th>
-                                <?php } ?>
-                                </div>
+                            <?php } ?>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        foreach ($darren as $key) { ?>
+                        <?php foreach ($darren as $key) { ?>
                             <tr>
                                 <td><?= $key->nama_teknisi ?></td>
                                 <td><?= $key->no_telp ?></td>
                                 <td><?= $key->email ?></td>
                                 <td><?= $key->status ?></td>
-                                <?php if(session()->get('level')=="Admin" ){ ?>
+                                <?php if(session()->get('level') == "Admin" ){ ?>
                                     <td>
                                         <a href="<?= base_url('home/eteknisi/' . $key->id_teknisi) ?>">
                                             <button class="btn btn-sm btn-primary">Edit</button>
@@ -39,8 +42,7 @@
                                             <button class="btn btn-sm btn-danger">Delete</button>
                                         </a>
                                     </td>
-                                    <?php } ?>
-                                    </div>
+                                <?php } ?>
                             </tr>
                         <?php } ?>
                     </tbody>

@@ -39,7 +39,7 @@
                 <div class="d-flex justify-content-center align-items-center ms-4 mb-4">
                 <?php if(session()->get('level')=="Admin" ){ ?>
     <a href="<?= base_url('home/pesan') ?>" class="btn btn-primary rounded-pill m-2 btn-custom">
-        Pesan Service
+        Tambah Pesanan
     </a>
     <?php } ?>
 </div>
@@ -81,14 +81,7 @@ $current_url = $_SERVER['REQUEST_URI']; // Mendapatkan URL saat ini
 <a href="<?= base_url('home/log_activity') ?>" class="nav-item nav-link <?= ($current_url == '/home/log_activity') ? 'active' : '' ?>">
     <i class="fa fa-list-alt me-2"></i>Log Activity
 </a>
-
-<!-- Edit History Menu -->
-<a href="<?= base_url('home/edit_history') ?>" class="nav-item nav-link <?= ($current_url == '/home/edit_history') ? 'active' : '' ?>">
-    <i class="fa fa-history me-2"></i>Edit History
-</a>
-
-
-                       
+                        <!-- New History Edit Menu -->
                     </div>
                 </div>
             </nav>
@@ -176,13 +169,12 @@ $current_url = $_SERVER['REQUEST_URI']; // Mendapatkan URL saat ini
                     </div>
                     <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                        <img class="rounded-circle me-lg-2" src="<?= base_url('img/user.jpg') ?>" alt=""
-                            style="width: 40px; height: 40px;">
+                    
                         <span class="d-none d-lg-inline-flex"><?= session()->get('username') ?></span>
                     </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
-                            <a href="#" class="dropdown-item">My Profile</a>
-                            <a href="#" class="dropdown-item">Settings</a>
+                            <a href="profile" class="dropdown-item">My Profile</a>
+                            <a href="setting" class="dropdown-item">Settings</a>
                             <a href="logout" class="dropdown-item">Log Out</a>
                         </div>
                     </div>

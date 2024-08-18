@@ -79,6 +79,10 @@
                                 <td colspan="7">Tidak ada transaksi</td>
                             </tr>
                         <?php endif; ?>
+
+                        <div class="mt-3">
+            <h6>Total Harga: Rp <?= number_format($totalAmount, 0, ',', '.') ?></h6>
+        </div>
                     </tbody>
                 </table>
                 

@@ -26,15 +26,15 @@ class servicemodel extends Model
           			 ->getResult();   
 
 	}
-    public function tampil_urut($tabel){
-        return $this->db->table($tabel)
-            ->orderBy('id_donasi', 'DESC')
-            ->get()
-            ->getResult();   
+    public function tampil_urut($table){
+        return $this->db->table($table)
+        ->where('deleted_at', NULL)
+        ->get()
+        ->getResult();
     }
     public function join($tabel1, $tabel2, $on){
      return $this->db->table($tabel1)  
-                     ->join($tabel2,$on,'left')
+                     ->join($tabel2,$on)
                      ->get()
                      ->getResult();   
 
@@ -111,9 +111,13 @@ class servicemodel extends Model
                             ->getResult();   
     
         }
+        
         public function getById($id)
         {
-            return $this->where('id_user', $id)->first();
+            return $this->db->table('teknisi_backup') 
+            ->where('id_teknisi', $id)
+            ->get()
+            ->getResult();   
         }
         
         public function betweenjoin1($table1, $table2, $on1, $tanggalAwal, $tanggalAkhir)
@@ -212,9 +216,12 @@ public function getTransactionById($id)
 
 public function getRecentOrders()
 {
-    // Mengurutkan berdasarkan id_pesanan dalam urutan menurun
-    return $this->orderBy('id_pesanan', 'DESC')->findAll();
+    // Mengurutkan berdasarkan id_pesanan dalam urutan menurun dan hanya menampilkan pesanan yang belum dihapus
+    return $this->where('deleted_at', null)
+                ->orderBy('id_pesanan', 'DESC')
+                ->findAll();
 }
+
 
 
 public function generateNoTransaksi($kodeToko = '100') {
@@ -239,14 +246,16 @@ public function generateNoTransaksi($kodeToko = '100') {
     return $newCode;
 }
 
-public function tampil2($table2)
+public function tampil2($table2, $limit, $offset)
 {
     return $this->db->table($table2)
-        ->where('deleted', NULL)
+        ->where('deleted_at', NULL)
         ->orderBy('id_transaksi', 'DESC')
+        ->limit($limit, $offset)
         ->get()
         ->getResultArray();
 }
+
 
 public function updateOrderStatus($orderId, $status)
 {
@@ -304,8 +313,40 @@ public function query($query)
 
 }
 
-public function editkan($id, $data)
-    {
-        return $this->update($id, $data); // Menggunakan update untuk mengubah data
+public function insertBackup($data)
+{
+    // Cek apakah data berhasil dimasukkan
+    if (!$this->db->table('teknisi_backup')->insert($data)) {
+        log_message('error', 'Gagal menyimpan data ke teknisi_backup');
     }
+}
+
+
+public function getBackupData()
+{
+    return $this->db->table('teknisi_backup')->get()->getResultArray();
+}
+  
+public function getProductById($id)
+{
+    return $this->db->table('teknisi')->where('id_teknisi', $id)->get()->getRow();
+}
+
+public function getFilteredTransactions($tanggal1, $tanggal2)
+{
+    return $this->db->table('transaksi')
+        ->where('deleted_at', NULL)
+        ->where('tanggal >=', $tanggal1)
+        ->where('tanggal <=', $tanggal2)
+        ->orderBy('id_transaksi', 'DESC')
+        ->get()
+        ->getResult(); // Use getResult() to get objects
+}
+
+public function updateUser($id_user, $data)
+{
+    return $this->db->table('user')->where('id_user', $id_user)->update($data);
+}
+
+
 }

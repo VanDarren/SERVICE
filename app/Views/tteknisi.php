@@ -25,6 +25,14 @@
         .form-container .btn-primary:hover {
             background-color: #0056b3;
         }
+        .form-container .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            margin-top: 10px;
+        }
+        .form-container .btn-secondary:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -39,39 +47,25 @@
                             <label for="nama">Nama</label>
                             <input type="text" class="form-control" name="nama">  
                         </div>
+
+                        <!-- No. Telp -->
                         <div class="form-group">
-                            <label for="nama">No. Telp</label>
+                            <label for="notelp">No. Telp</label>
                             <input type="text" class="form-control" name="notelp">  
                         </div>
-                        <!-- Alamat -->
+
+                        <!-- Email -->
                         <div class="form-group">
-                            <label for="alamat">Email</label>
+                            <label for="email">Email</label>
                             <input type="text" class="form-control" name="email">  
                         </div>
-
-
-
-
-                        <!-- Sistem Pemesanan -->
-                        <!-- <fieldset class="form-group"> -->
-                            <!-- <legend>Sistem Pemesanan</legend> -->
-                            <!-- <div class="form-check"> -->
-                                <!-- <input class="form-check-input" type="radio" name="sistemPemesanan" id="sistemOnline" value="online"> -->
-                                <!-- <label class="form-check-label" for="sistemOnline"> -->
-                                    <!-- Pick Up -->
-                                <!-- </label> -->
-                            <!-- </div> -->
-                            <!-- <div class="form-check"> -->
-                                <!-- <input class="form-check-input" type="radio" name="sistemPemesanan" id="sistemOffline" value="offline"> -->
-                                <!-- <label class="form-check-label" for="sistemOffline"> -->
-                                   <!-- On the Spot/Langsung ditempat -->
-                                <!-- </label> -->
-                            <!-- </div> -->
-                        <!-- </fieldset> -->
 
                         <!-- Submit Button -->
                         <button type="submit" class="btn btn-primary btn-block">Add Teknisi</button>
                     </form>
+
+                    <!-- Back to Dashboard Button -->
+                    <a href="<?=base_url('home/dashboard')?>" class="btn btn-secondary btn-block">Kembali ke Dashboard</a>
                 </div>
             </div>
         </div>

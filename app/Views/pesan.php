@@ -25,6 +25,14 @@
         .form-container .btn-primary:hover {
             background-color: #0056b3;
         }
+        .form-container .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            margin-top: 10px;
+        }
+        .form-container .btn-secondary:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -76,14 +84,18 @@
                             <textarea class="form-control" name="deskripsi" rows="3" placeholder="Deskripsi Masalah"></textarea>
                         </div>
 
+                        <!-- Request Tanggal Service -->
                         <div class="form-group">
-    <label for="tanggalService">Request Tanggal Service (Optional)</label>
-    <input type="date" class="form-control" name="tanggal_service" placeholder="Pilih Tanggal Service">
-</div>
+                            <label for="tanggalService">Request Tanggal Service (Optional)</label>
+                            <input type="date" class="form-control" name="tanggal_service" placeholder="Pilih Tanggal Service">
+                        </div>
 
                         <!-- Submit Button -->
                         <button type="submit" class="btn btn-primary btn-block">Pesan Sekarang</button>
                     </form>
+
+                    <!-- Back to Dashboard Button -->
+                    <a href="<?=base_url('home/dashboard')?>" class="btn btn-secondary btn-block">Kembali ke Dashboard</a>
                 </div>
             </div>
         </div>

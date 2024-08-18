@@ -67,23 +67,6 @@
 
 
 
-                        <!-- Sistem Pemesanan -->
-                        <!-- <fieldset class="form-group"> -->
-                        <!-- <legend>Sistem Pemesanan</legend> -->
-                        <!-- <div class="form-check"> -->
-                        <!-- <input class="form-check-input" type="radio" name="sistemPemesanan" id="sistemOnline" value="online"> -->
-                        <!-- <label class="form-check-label" for="sistemOnline"> -->
-                        <!-- Pick Up -->
-                        <!-- </label> -->
-                        <!-- </div> -->
-                        <!-- <div class="form-check"> -->
-                        <!-- <input class="form-check-input" type="radio" name="sistemPemesanan" id="sistemOffline" value="offline"> -->
-                        <!-- <label class="form-check-label" for="sistemOffline"> -->
-                        <!-- On the Spot/Langsung ditempat -->
-                        <!-- </label> -->
-                        <!-- </div> -->
-                        <!-- </fieldset> -->
-
                         <!-- Submit Button -->
                         <input type="hidden" name="id" value="<?= $user->id_teknisi ?>">
                         <button type="submit" class="btn btn-primary btn-block">Save Changes</button>

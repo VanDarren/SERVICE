@@ -36,7 +36,8 @@ $routes->get('/', 'Home::index');
 $routes->get('/log', 'Home::index');
 $routes->post('/log/add', 'Home::addLog');
 $routes->get('captcha/generateCaptcha', 'Home::generateCaptcha');
-
+$routes->get('home/restore/(:num)', 'Home::restore/$1');
+	
 
 
 /*

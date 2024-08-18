@@ -26,6 +26,7 @@
         <div class="row g-4">
             <div class="col-12">
                 <h4>Selamat datang, <?= session()->get('username'); ?>!</h4>
+                
             </div>
         </div>
     <!-- Sale & Revenue Start -->
@@ -50,8 +51,10 @@
         <div class="bg-light text-center rounded p-4">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h6 class="mb-0">Recent Orders</h6>
-                <a href="#">Show All</a>
+                <a href="<?= base_url('home/restorep') ?>" class="btn btn-warning">Restore Data</a> <!-- Tombol untuk menuju halaman restore -->
+                
             </div>
+            
             <?php if (empty($darren)) { ?>
                 <p>No orders found. Please add some orders to see them here.</p>
             <?php } else { ?>
@@ -88,8 +91,9 @@
             <td><?= htmlspecialchars($key['deskripsi_masalah']) ?></td>
             <td><?= htmlspecialchars($key['sistem_pesanan']) ?></td>
             <td class="<?= $key['status'] === 'Pending' ? 'status-pending' : ($key['status'] === 'On-Going' ? 'status-on-going' : 'status-done') ?>">
-                <?= htmlspecialchars($key['status']) ?>
-            </td>
+    <?= htmlspecialchars($key['status']) ?>
+</td>
+
             <td class="estimasi-waktu" data-end="<?= !empty($key['estimasi_waktu']) ? htmlspecialchars($key['estimasi_waktu']) : 'None' ?>">
     <?= !empty($key['estimasi_waktu']) ? htmlspecialchars($key['estimasi_waktu']) : 'None' ?>
 </td>
@@ -190,10 +194,10 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="estimasiWaktu">Estimasi Waktu</label>
-                      <input type="datetime-local" class="form-control" id="estimasiWaktu" name="estimasi_waktu" value="<?= !empty($key['estimasi_waktu']) ? htmlspecialchars($key['estimasi_waktu']) : '' ?>">
+    <label for="estimasiWaktu">Estimasi Waktu</label>
+    <input type="time" class="form-control" id="estimasiWaktu" name="estimasi_waktu" value="<?= !empty($key['estimasi_waktu']) ? htmlspecialchars($key['estimasi_waktu']) : '' ?>">
+</div>
 
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -212,44 +216,51 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-   $('#detailsModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var id = button.data('id');
-        var nama = button.data('nama');
-        var merkGenset = button.data('merk-genset');
-        var merkMesin = button.data('merk-mesin');
-        var kapasitas = button.data('kapasitas');
-        var deskripsi = button.data('deskripsi');
-        var sistem = button.data('sistem');
-        var status = button.data('status');
-        var notelp = button.data('notelp');
-        var alamat = button.data('alamat');
-        var teknisiId = button.data('id-teknisi');
-        var estimasiWaktu = button.data('estimasi-waktu') || '00:00:00';  // Default to '00:00:00' if not available
+  $('#detailsModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var id = button.data('id');
+    var nama = button.data('nama');
+    var merkGenset = button.data('merk-genset');
+    var merkMesin = button.data('merk-mesin');
+    var kapasitas = button.data('kapasitas');
+    var deskripsi = button.data('deskripsi');
+    var sistem = button.data('sistem');
+    var status = button.data('status');
+    var notelp = button.data('notelp');
+    var alamat = button.data('alamat');
+    var teknisiId = button.data('id-teknisi');
+    var estimasiWaktu = button.data('estimasi-waktu');
 
-        var modal = $(this);
-        modal.find('#orderId').val(id);
-        modal.find('#namaPemilik').val(nama);
-        modal.find('#merkGenset').val(merkGenset);
-        modal.find('#merkMesin').val(merkMesin);
-        modal.find('#kapasitas').val(kapasitas);
-        modal.find('#deskripsi').val(deskripsi);
-        modal.find('#sistemPesanan').val(sistem);
-        modal.find('#status').val(status);
-        modal.find('#notelp').val(notelp);
-        modal.find('#alamat').val(alamat);
-        modal.find('#teknisi').val(teknisiId);
-        modal.find('#estimasiWaktu').val(estimasiWaktu ? new Date(estimasiWaktu).toISOString().slice(0, 16) : '');
+    var modal = $(this);
+    modal.find('#orderId').val(id);
+    modal.find('#namaPemilik').val(nama);
+    modal.find('#merkGenset').val(merkGenset);
+    modal.find('#merkMesin').val(merkMesin);
+    modal.find('#kapasitas').val(kapasitas);
+    modal.find('#deskripsi').val(deskripsi);
+    modal.find('#sistemPesanan').val(sistem);
+    modal.find('#status').val(status);
+    modal.find('#notelp').val(notelp);
+    modal.find('#alamat').val(alamat);
+    modal.find('#teknisi').val(teknisiId);
+    modal.find('#estimasiWaktu').val(estimasiWaktu);
 
-        var userLevel = '<?= session()->get('level') ?>'; // Assumes user level is available
-        if (userLevel !== 'Admin') {
-            modal.find('#sistemPesanan').prop('disabled', true);
-            modal.find('#status').prop('disabled', true);
+    if (status === 'Pending') {
+        modal.find('#status option[value="Done"]').prop('disabled', true);
+    } else {
+        modal.find('#status option[value="Done"]').prop('disabled', false);
+    }
+
+    // Update status dropdown when the status changes
+    modal.find('#status').on('change', function () {
+        if ($(this).val() === 'Pending') {
+            modal.find('#status option[value="Done"]').prop('disabled', true);
         } else {
-            modal.find('#sistemPesanan').prop('disabled', false);
-            modal.find('#status').prop('disabled', false);
+            modal.find('#status option[value="Done"]').prop('disabled', false);
         }
     });
+  });
+
 
     function confirmDelete(url) {
         if (confirm('Are you sure you want to delete this order?')) {
@@ -257,33 +268,53 @@
         }
     }
 
+
     function updateCountdown() {
     const countdownElements = document.querySelectorAll('.estimasi-waktu');
 
     countdownElements.forEach(element => {
         const endTimeStr = element.dataset.end;
-        const endTime = endTimeStr === 'None' ? null : new Date(endTimeStr).getTime();
-        const now = new Date().getTime();
-        const distance = endTime ? endTime - now : null;
 
-        if (distance === null || distance < 0) {
+        // Check if the end time is available and valid
+        if (!endTimeStr || endTimeStr === 'None') {
             element.innerHTML = 'Waiting';
-            element.parentElement.querySelector('.status').innerHTML = 'Waiting';
-            element.parentElement.querySelector('.status').classList.remove('status-pending', 'status-on-going', 'status-done');
-            element.parentElement.querySelector('.status').classList.add('status-waiting');
+            const statusElement = element.parentElement.querySelector('.status');
+            if (statusElement) {
+                statusElement.innerHTML = 'Waiting';
+                statusElement.classList.remove('status-pending', 'status-on-going', 'status-done');
+                statusElement.classList.add('status-waiting');
+            }
+            return;
+        }
+
+        // Parse the end time as a local time on today's date
+        const [hours, minutes, seconds] = endTimeStr.split(':').map(Number);
+        const endTime = new Date();
+        endTime.setHours(hours, minutes, seconds || 0, 0); // Set the time components
+
+        const now = new Date();
+
+        const distance = endTime.getTime() - now.getTime();
+
+        if (distance < 0) {
+            element.innerHTML = 'Menunggu Konfirmasi';
+            const statusElement = element.parentElement.querySelector('.status');
+            if (statusElement) {
+                statusElement.innerHTML = 'Menunggu Konfirmasi';
+                statusElement.classList.remove('status-pending', 'status-on-going', 'status-done');
+                statusElement.classList.add('status-waiting');
+            }
         } else {
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const hours = Math.floor(distance / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            element.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            element.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
         }
     });
 }
 
-
-    setInterval(updateCountdown, 1000);
+setInterval(updateCountdown, 1000);
 </script>
 
 </body>
