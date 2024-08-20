@@ -397,6 +397,11 @@ public function pesan()
         $h = $this->request->getPost('tanggal_service'); 
         $id_user = session()->get('id');
 
+        // Jika tanggal_service kosong, set menjadi NULL
+    if (empty($h)) {
+        $h = null;
+    }
+
         $tabel = array(
             'nama_pemilik' => $a,
             'no_telp' => $b,

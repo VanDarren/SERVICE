@@ -132,10 +132,11 @@ class servicemodel extends Model
         
         
 
-public function getTotalOrders()
-{
-    return $this->countAll();
-}
+        public function getTotalOrders()
+        {
+            return $this->where('deleted_at', null)->countAllResults();
+        }
+        
 
 
 public function edit2($table2, $data, $where)
